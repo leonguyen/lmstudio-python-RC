@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: lmstudio-python-service
+    env: docker
+    plan: starter
+    region: oregon
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: LM_STUDIO_HOST
+        value: "https://your-headless-lmstudio-server.com/v1" # Swap with your actual live model endpoint
+
