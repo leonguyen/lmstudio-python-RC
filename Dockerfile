@@ -1,21 +1,30 @@
-# Use an official Python runtime as a parent image
-FROM python:3.11-slim
+FROM ubuntu:22.04
 
-# Set the working directory in the container
+# Install dependencies, Python, and curl
+RUN apt-get update && apt-get install -y \
+    curl \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install LM Studio Headless Core (llmster)
+RUN curl -fsSL https://lmstudio.ai/install.sh | bash
+
+# Ensure lms CLI is in path
+ENV PATH="/root/.cache/lm-studio/bin:${PATH}"
+
+# Install the Python SDK
+RUN pip3 install lmstudio
+
+# Create a work directory
 WORKDIR /app
 
-# Copy the dependencies file to the working directory
-COPY Requirements.txt .
+# Copy your Python application script (e.g., app.py)
+COPY . /app
 
-# Install dependencies
-RUN pip install --no-cache-dir -r Requirements.txt
+# Expose LM Studio default server port
+EXPOSE 1234
 
-# Copy the rest of the application code
-COPY . .
-
-# Expose the port Render expects
-EXPOSE 10000
-
-# Run the application using gunicorn for production stability
-CMD ["gunicorn", "--bind", "0.0.0.0:10000", "app:app"]
+# Start the server and run your python process
+CMD ["sh", "-x", "-c", "lms server start --port 1234 & python3 app.py"]
 
